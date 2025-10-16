@@ -4,6 +4,8 @@
 """
 Jeux  de Nim (variante simple et de Marienbad)
 """
+import random
+
 
 def nim_game(): # C'est la fonction principale qui contient tout le jeu.
 
@@ -15,33 +17,104 @@ def nim_game(): # C'est la fonction principale qui contient tout le jeu.
 
     pile_of_matches = 21  # Nombre initial d'allumettes
 
-    # Demander le nom de chaque joueur
-    player_01 = input("Veuillez saisir votre nom: ") # Ces variables demandent et stockent les noms des joueurs.
-    player_02 = input("Veuillez saisir votre nom: ")
+    # Choix du mode de jeu
+    print("Choisissez le mode de jeu :")
+    print("1. Joueur contre Joueur")
+    print("2. Joueur contre Ordinateur")
+    mode = input("Votre choix (1 ou 2) : ").strip()
 
-    # Choix du joueur qui commence
-    first = input(f"Qui commence ({player_01} ou {player_02}) ?").strip() # j'enlève les espaces superflus.
-    if first.lower() == player_01.lower():
-        current_player = player_01
-        other_player = player_02
+    # Déclaration de la variable nombre d'allumettes que le joueur vient de retirer
+    last_player_move = 0 # Initialisation
+
+    if mode == "1":
+        # Mode Joueur contre Joueur
+        player_01 = input("Veuillez saisir votre nom: ") # Ces variables demandent et stockent les noms des joueurs.
+        player_02 = input("Veuillez saisir votre nom: ")
+
+        # Choix du joueur qui commence
+        first = input(f"Qui commence ({player_01} ou {player_02}) ?").strip() # j'enlève les espaces superflus.
+        if first.lower() == player_01.lower():
+            current_player = player_01
+            other_player = player_02
+        else:
+            current_player = player_02
+            other_player = player_01
+
     else:
-        current_player = player_02
-        other_player = player_01
+        # Mode Joueur contre Ordinateur
+        player_01 = input("Veuillez saisir votre nom : ")
+        player_02 = "Ordinateur"
+
+        # Choix du joueur qui commence
+        print("Qui commence ?")
+        print(f"1. {player_01}")
+        print("2. Ordinateur")
+        first_choice = input("Votre choix (1 ou 2) : ").strip()
+
+        if first_choice == "1":
+            current_player = player_01
+            other_player = player_02
+            print(f"{player_01} commence la partie !")
+        else:
+            current_player = player_02
+            other_player = player_01
+            print("L'ordinateur commence la partie !")
+
     # Déroulement du jeu
     while pile_of_matches > 0: # La boucle continue tant qu'il reste des allumettes.
         print(f"\nIl reste {pile_of_matches} allumettes.") # J'affiche le nombre d'allumettes restantes.
         print(f"C'est à {current_player} de jouer") # J'affiche le joueur dont c'est le tour.
 
-    # Saisie et validation du choix du joueur
+        if current_player == "Ordinateur":
+            # Tour de l'ordinateur
+            if other_player == player_01:  # Cas 1 : L'ordinateur joue en second
+                # L'ordinateur applique la stratégie : retire 5 - k
+                # Pour forcer le joueur à prendre la dernière allumette
+                remove = 5 - last_player_move
+                # Vérification que le coup est valide
+                if remove < 1:
+                    remove = 1
+                elif remove > 4:
+                    remove = 4
+                if remove > pile_of_matches:
+                    remove = pile_of_matches
+
+                print(f"L'ordinateur retire {remove} allumettes.")
+
+            else:  # Cas 2 : L'ordinateur commence
+                # Stratégie : se ramener au cas précédent dès que possible
+                # L'objectif est de laisser un multiple de 5 + 1 allumettes
+                target_position = (pile_of_matches - 1) % 5
+                if target_position == 0:
+                    # Position gagnante, on peut appliquer la stratégie normale
+                    remove = 1  # On commence par un coup sûr
+                else:
+                    # On essaie d'atteindre une position gagnante
+                    remove = target_position
+                    if remove == 0:
+                        remove = 1
+
+                # Vérification que le coup est valide
+                if remove > pile_of_matches:
+                    remove = pile_of_matches
+
+                print(f"L'ordinateur retire {remove} allumettes.")
+        else:
+            # Saisie et validation du choix du joueur
+            remove = int(input(f"{current_player}, combien d'allumettes voulez-vous retirer (1-4) ? "))
+            while remove < 1 or remove > 4 or remove > pile_of_matches:
+                print("Choix invalide. Vous devez retirer entre 1 et 4 allumettes, sans dépasser le nombre restant.")
+                remove = int(input(f"{current_player}, combien d'allumettes voulez-vous retirer (1-4) ? "))
+
+                # Sauvegarde du coup du joueur pour la stratégie de l'ordinateur
+            if mode == "2" and current_player != "Ordinateur":
+                last_player_move = remove
+
         """ Le programme demande au joueur le nombre d'allumettes à retirer, la boucle valide l'entrée:
     . doit être entre 1 et 4
     . ne peut pas dépasser le nombre d'allumettes restantes
-    . si saisie invalide, redemander jusqu'à obtenir une valeur correcte"""
+    . si saisie invalide, redemander jusqu'à obtenir une valeur correcte    """
 
-        remove = int(input(f"{current_player}, combien d'allumettes voulez-vous retirer (1-4) ? "))
-        while remove < 1 or remove > 4 or remove > pile_of_matches:
-            print("Choix invalide. Vous devez retirer entre 1 et 4 allumettes, sans dépasser le nombre restant.")
-            remove = int(input(f"{current_player}, combien d'allumettes voulez-vous retirer (1-4) ? "))
     # Mise à jour de la pile
         pile_of_matches -= remove # Je soustrais le nombre d'allumettes retirées du total.
 
@@ -54,8 +127,133 @@ def nim_game(): # C'est la fonction principale qui contient tout le jeu.
     # Je procède au changement de joueur
         current_player, other_player = other_player, current_player
 
+def marienbad_game():
+    """Jeu de Marienbad - Variante avec 4 tas"""
+
+    print("Bienvenue au jeu de Marienbad !")
+    print("Il y a 4 tas avec respectivement 1, 3, 5 et 7 allumettes.")
+    print("À chaque tour, vous pouvez prendre autant d'allumettes que vous voulez d'un SEUL tas.")
+    print("Celui qui prend la dernière allumette perd !\n")
+
+    # Initialisation des tas
+    piles = [1, 3, 5, 7]
+
+    # Choix du mode de jeu
+    print("Choisissez le mode de jeu :")
+    print("1. Joueur contre Joueur")
+    print("2. Joueur contre Ordinateur")
+    mode = input("Votre choix (1 ou 2) : ").strip()
+
+    if mode == "1":
+        # Mode Joueur contre Joueur
+        player_01 = input("Veuillez saisir le nom du premier joueur : ")
+        player_02 = input("Veuillez saisir le nom du deuxième joueur : ")
+
+        first = input(f"Qui commence ({player_01} ou {player_02}) ? ").strip()
+        if first.lower() == player_01.lower():
+            current_player = player_01
+            other_player = player_02
+        else:
+            current_player = player_02
+            other_player = player_01
+    else:
+        # Mode Joueur contre Ordinateur
+        player_01 = input("Veuillez saisir votre nom : ")
+        player_02 = "Ordinateur"
+
+        print("Qui commence ?")
+        print(f"1. {player_01}")
+        print("2. Ordinateur")
+        first_choice = input("Votre choix (1 ou 2) : ").strip()
+
+        if first_choice == "1":
+            current_player = player_01
+            other_player = player_02
+            print(f"{player_01} commence la partie !")
+        else:
+            current_player = player_02
+            other_player = player_01
+            print("L'ordinateur commence la partie !")
+        # Déroulement du jeu
+    while sum(piles) > 0:
+        print(f"\nÉtat des tas :")
+        for i, pile in enumerate(piles, 1):
+            print(f"Tas {i}: {pile} allumette{'s' if pile > 1 else ''}")
+
+        print(f"\nC'est à {current_player} de jouer")
+
+        if current_player == "Ordinateur":
+            # Stratégie simple de l'ordinateur
+            remove, pile_index = computer_strategy_marienbad(piles)
+            piles[pile_index] -= remove
+            print(f"L'ordinateur retire {remove} allumette{'s' if remove > 1 else ''} du tas {pile_index + 1}")
+
+        else:
+            # Tour du joueur humain
+            print("Choisissez un tas et le nombre d'allumettes à retirer.")
+            pile_index = int(input("Numéro du tas (1-4) : ")) - 1
+
+            while pile_index < 0 or pile_index > 3 or piles[pile_index] == 0:
+                print("Tas invalide. Choisissez un tas entre 1 et 4 qui contient des allumettes.")
+                pile_index = int(input("Numéro du tas (1-4) : ")) - 1
+
+            max_take = piles[pile_index]
+            remove = int(input(f"Nombre d'allumettes à retirer (1-{max_take}) : "))
+
+            while remove < 1 or remove > max_take:
+                print(f"Nombre invalide. Vous devez retirer entre 1 et {max_take} allumettes.")
+                remove = int(input(f"Nombre d'allumettes à retirer (1-{max_take}) : "))
+
+            piles[pile_index] -= remove
+
+            # Vérification si la partie est terminée
+            if sum(piles) == 0:
+                print(f"\n{current_player} a pris la dernière allumette !")
+                print(f"{other_player} a gagné !")
+                break
+
+            # Changement de joueur
+            current_player, other_player = other_player, current_player
+
+def computer_strategy_marienbad(piles):
+    """Stratégie simple pour l'ordinateur au jeu de Marienbad"""
+
+    # Stratégie 1: Prendre toutes les allumettes d'un tas s'il n'en reste qu'un
+    for i, pile in enumerate(piles):
+        if pile == 1:
+            return 1, i
+
+    # Stratégie 2: Prendre aléatoirement d'un tas non vide
+    non_empty_piles = [i for i, pile in enumerate(piles) if pile > 0]
+    pile_index = random.choice(non_empty_piles)
+
+    # Prendre entre 1 et la moitié des allumettes du tas (ou 1 si le tas est petit)
+    max_take = piles[pile_index]
+    if max_take == 1:
+        remove = 1
+    else:
+        remove = random.randint(1, max(1, max_take // 2))
+
+    return remove, pile_index
+
+def main():
+    """Fonction principale pour choisir le jeu"""
+    print("Choisissez le jeu :")
+    print("1. Jeu du Nim classique (21 allumettes)")
+    print("2. Jeu de Marienbad (4 tas)")
+
+    choice = input("Votre choix (1 ou 2) : ").strip()
+
+    if choice == "1":
+        nim_game()
+    elif choice == "2":
+        marienbad_game()
+    else:
+        print("Choix invalide. Lancement du jeu du Nim classique.")
+        nim_game()
+
 # Je lance la partie
 
 if __name__ == "__main__":
-    nim_game()
+    main()
 
