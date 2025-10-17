@@ -127,15 +127,19 @@ def nim_game(): # C'est la fonction principale qui contient tout le jeu.
     # Je procède au changement de joueur
         current_player, other_player = other_player, current_player
 
+
 def marienbad_game():
     """Jeu de Marienbad - Variante avec 4 tas"""
+    # Cette fonction implémente la variante Marienbad du jeu de Nim
+    # Le jeu se joue avec 4 tas de tailles différentes : 1, 3, 5 et 7 allumettes
+    # Les règles sont similaires, mais avec plusieurs tas au lieu d'un seul.
 
     print("Bienvenue au jeu de Marienbad !")
     print("Il y a 4 tas avec respectivement 1, 3, 5 et 7 allumettes.")
     print("À chaque tour, vous pouvez prendre autant d'allumettes que vous voulez d'un SEUL tas.")
     print("Celui qui prend la dernière allumette perd !\n")
 
-    # Initialisation des tas
+    # Initialisation des tas — configuration classique du jeu de Marienbad
     piles = [1, 3, 5, 7]
 
     # Choix du mode de jeu
@@ -174,7 +178,8 @@ def marienbad_game():
             current_player = player_02
             other_player = player_01
             print("L'ordinateur commence la partie !")
-        # Déroulement du jeu
+
+    # Déroulement du jeu — la boucle continue tant qu'il reste des allumettes dans au moins un tas
     while sum(piles) > 0:
         print(f"\nÉtat des tas :")
         for i, pile in enumerate(piles, 1):
@@ -183,7 +188,7 @@ def marienbad_game():
         print(f"\nC'est à {current_player} de jouer")
 
         if current_player == "Ordinateur":
-            # Stratégie simple de l'ordinateur
+            # Tour de l'ordinateur : utilisation de la stratégie définie séparément
             remove, pile_index = computer_strategy_marienbad(piles)
             piles[pile_index] -= remove
             print(f"L'ordinateur retire {remove} allumette{'s' if remove > 1 else ''} du tas {pile_index + 1}")
@@ -193,6 +198,7 @@ def marienbad_game():
             print("Choisissez un tas et le nombre d'allumettes à retirer.")
             pile_index = int(input("Numéro du tas (1-4) : ")) - 1
 
+            # Validation du tas choisi : doit être entre 1 et 4 et contenir des allumettes
             while pile_index < 0 or pile_index > 3 or piles[pile_index] == 0:
                 print("Tas invalide. Choisissez un tas entre 1 et 4 qui contient des allumettes.")
                 pile_index = int(input("Numéro du tas (1-4) : ")) - 1
@@ -200,30 +206,35 @@ def marienbad_game():
             max_take = piles[pile_index]
             remove = int(input(f"Nombre d'allumettes à retirer (1-{max_take}) : "))
 
+            # Validation du nombre d'allumettes à retirer
             while remove < 1 or remove > max_take:
                 print(f"Nombre invalide. Vous devez retirer entre 1 et {max_take} allumettes.")
                 remove = int(input(f"Nombre d'allumettes à retirer (1-{max_take}) : "))
 
+            # Mise à jour du tas après retrait des allumettes
             piles[pile_index] -= remove
 
-            # Vérification si la partie est terminée
-            if sum(piles) == 0:
-                print(f"\n{current_player} a pris la dernière allumette !")
-                print(f"{other_player} a gagné !")
-                break
+        # Vérification si la partie est terminée (plus d'allumettes dans aucun tas)
+        if sum(piles) == 0:
+            print(f"\n{current_player} a pris la dernière allumette !")
+            print(f"{other_player} a gagné !")
+            break
 
-            # Changement de joueur
-            current_player, other_player = other_player, current_player
+        # Changement de joueur pour le tour suivant
+        current_player, other_player = other_player, current_player
+
 
 def computer_strategy_marienbad(piles):
     """Stratégie simple pour l'ordinateur au jeu de Marienbad"""
+    # Cette fonction détermine le coup de l'ordinateur.
+    # Elle utilise une stratégie basique.
 
-    # Stratégie 1: Prendre toutes les allumettes d'un tas s'il n'en reste qu'un
+    # Stratégie 1 : Prendre toutes les allumettes d'un tas s'il n'en reste qu'un
     for i, pile in enumerate(piles):
         if pile == 1:
             return 1, i
 
-    # Stratégie 2: Prendre aléatoirement d'un tas non vide
+    # Stratégie 2 : Prendre aléatoirement d'un tas non vide
     non_empty_piles = [i for i, pile in enumerate(piles) if pile > 0]
     pile_index = random.choice(non_empty_piles)
 
@@ -236,24 +247,41 @@ def computer_strategy_marienbad(piles):
 
     return remove, pile_index
 
+
 def main():
-    """Fonction principale pour choisir le jeu"""
-    print("Choisissez le jeu :")
-    print("1. Jeu du Nim classique (21 allumettes)")
-    print("2. Jeu de Marienbad (4 tas)")
+    """Fonction principale pour choisir le jeu et gérer les multiples parties"""
+    # Cette fonction orchestre le déroulement global du programme
+    # Elle permet de choisir le jeu et de rejouer sans relancer le programme
 
-    choice = input("Votre choix (1 ou 2) : ").strip()
+    while True:  # Boucle principale pour permettre de jouer plusieurs parties
+        print("\n" + "="*50)
+        print("         MENU PRINCIPAL DES JEUX")
+        print("="*50)
+        print("Choisissez le jeu :")
+        print("1. Jeu du Nim classique (21 allumettes)")
+        print("2. Jeu de Marienbad (4 tas)")
+        print("3. Quitter")
 
-    if choice == "1":
-        nim_game()
-    elif choice == "2":
-        marienbad_game()
-    else:
-        print("Choix invalide. Lancement du jeu du Nim classique.")
-        nim_game()
+        choice = input("Votre choix (1, 2 ou 3) : ").strip()
 
-# Je lance la partie
+        if choice == "1":
+            nim_game()
+        elif choice == "2":
+            marienbad_game()
+        elif choice == "3":
+            print("Merci d'avoir joué ! À bientôt !")
+            break  # Sort de la boucle while pour terminer le programme
+        else:
+            print("Choix invalide. Veuillez choisir 1, 2 ou 3.")
 
+        # Après chaque partie, proposer de rejouer ou de changer de jeu
+        if choice in ["1", "2"]:
+            replay = input("\nVoulez-vous jouer une autre partie ? (o/n) : ").strip().lower()
+            if replay != 'o' and replay != 'oui':
+                print("Merci d'avoir joué ! À bientôt !")
+                break
+
+
+# Point d'entrée du programme
 if __name__ == "__main__":
     main()
-
